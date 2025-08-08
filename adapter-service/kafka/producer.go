@@ -31,7 +31,6 @@ func (p *producer) InitKafkaWriter(brokerURL, topic string) {
 }
 
 func (p *producer) PublishMessage(topic, payload string) error {
-	fmt.Println(topic)
 	writer, ok := p.writers[topic]
 	if !ok {
 		return fmt.Errorf("writer for topic %s not initialized", topic)

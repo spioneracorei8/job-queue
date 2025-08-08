@@ -11,6 +11,9 @@ go get github.com/joho/godotenv
 ```bash
 go get github.com/sirupsen/logrus
 ```
+```bash
+go get -u github.com/rs/zerolog/log
+```
 ## CAST DATA TYPE
 ```bash
 go get github.com/spf13/cast
