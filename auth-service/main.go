@@ -13,7 +13,9 @@ func getMainServer() *server.Server {
 		GRPC_TIMEOUT:                        config.GRPC_TIMEOUT,
 		SERVICE_CLIENT_USER_GRPC_ADDRESS:    config.SERVICE_CLIENT_USER_GRPC_ADDRESS,
 		SERVICE_CLIENT_ADAPTER_GRPC_ADDRESS: config.SERVICE_CLIENT_ADAPTER_GRPC_ADDRESS,
+		SERVICE_CLIENT_LOG_GRPC_ADDRESS:     config.SERVICE_CLIENT_LOG_GRPC_ADDRESS,
 		ROOT_PATH:                           config.ROOT_PATH,
+		SERVICE_NAME:                        config.SERVICE_NAME,
 	}
 }
 

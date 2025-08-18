@@ -4,7 +4,8 @@ import (
 	my_logger "auth-service/logger"
 	"auth-service/middleware"
 	"auth-service/routes"
-	"auth-service/services/adapter/repository"
+	_adapter_repo "auth-service/services/adapter/repository"
+	_adapter_us "auth-service/services/adapter/usecase"
 	_register_handler "auth-service/services/register/handler"
 	_register_repo "auth-service/services/register/repository"
 	_register_us "auth-service/services/register/usecase"
@@ -29,8 +30,11 @@ type Server struct {
 
 	PSQL_CONNECTION string
 
+	SERVICE_NAME string
+
 	SERVICE_CLIENT_USER_GRPC_ADDRESS    string
 	SERVICE_CLIENT_ADAPTER_GRPC_ADDRESS string
+	SERVICE_CLIENT_LOG_GRPC_ADDRESS     string
 }
 
 func connectDatabase(PSQL_CONNECTION string) *gorm.DB {
@@ -72,27 +76,31 @@ func (s *Server) Start() {
 	//==============================================================
 	registerRepo := _register_repo.NewRegisterRepoImpl(database)
 	userRepo := _user_repo.NewGrpcUserRepoImpl(s.SERVICE_CLIENT_USER_GRPC_ADDRESS, s.GRPC_TIMEOUT)
-	adapterRepo := repository.NewGrpcAdapterRepositoryImpl(s.SERVICE_CLIENT_ADAPTER_GRPC_ADDRESS, s.GRPC_TIMEOUT)
-
+	adapterRepo := _adapter_repo.NewGrpcAdapterRepositoryImpl(s.SERVICE_CLIENT_ADAPTER_GRPC_ADDRESS, s.GRPC_TIMEOUT)
 	//==============================================================
 	// # USECASES
 	//==============================================================
 	registerUs := _register_us.NewRegisterUsImpl(registerRepo, userRepo, adapterRepo, s.ROOT_PATH)
+	adapterUs := _adapter_us.NewAdapterUsecaseImpl(adapterRepo)
+
+	//==============================================================
+	// # LOGGER
+	//==============================================================
+	myZerolog := my_logger.NewLogger(s.SERVICE_NAME, adapterUs)
 
 	//==============================================================
 	// # HANDLERS
 	//==============================================================
-	registerHandler := _register_handler.NewRegisterHandlerImpl(registerUs)
-
+	registerHandler := _register_handler.NewRegisterHandlerImpl(myZerolog, registerUs)
 	//==============================================================
 	// # API
 	//==============================================================
-	app.GET("/", func(g *gin.Context) {
+	app.GET("/", middl.Logger(), func(g *gin.Context) {
+		myZerolog.Info(g, "test", map[string]any{"k1": "string", "k2": 2, "k3": 2.22})
 		g.JSON(http.StatusOK, "Hello World!")
 	})
 	api := routes.NewRoute(app, middl)
 	api.NewRegisterRoutes(registerHandler)
-
 	//==============================================================
 	// # GRPC
 	//==============================================================

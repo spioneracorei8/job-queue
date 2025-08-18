@@ -1,5 +1,6 @@
 package constants
 
+
 const (
 	// # source
 	SOURCE_WEB_APPLICATION    string = "WEB_APPLICATION"

@@ -35,3 +35,13 @@ func NewTimestampFromTime(t time.Time) time.Time {
 	d = d.In(loc)
 	return (d)
 }
+
+func NewTimestampRFC3339FromTime(t time.Time) time.Time {
+	loc := time.FixedZone("UTC+7", 7*60*60)
+	d, err := time.Parse(time.RFC3339, t.UTC().Format(time.RFC3339))
+	if err != nil {
+		panic(err)
+	}
+	d = d.In(loc)
+	return (d)
+}

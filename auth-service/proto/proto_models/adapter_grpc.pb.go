@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	Adapter_SendMail_FullMethodName = "/proto.Adapter/SendMail"
+	Adapter_SendLog_FullMethodName  = "/proto.Adapter/SendLog"
 )
 
 // AdapterClient is the client API for Adapter service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AdapterClient interface {
 	SendMail(ctx context.Context, in *SendMailRequest, opts ...grpc.CallOption) (*SendMailResponse, error)
+	SendLog(ctx context.Context, in *SendLogRequest, opts ...grpc.CallOption) (*SendLogResponse, error)
 }
 
 type adapterClient struct {
@@ -47,11 +49,22 @@ func (c *adapterClient) SendMail(ctx context.Context, in *SendMailRequest, opts 
 	return out, nil
 }
 
+func (c *adapterClient) SendLog(ctx context.Context, in *SendLogRequest, opts ...grpc.CallOption) (*SendLogResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SendLogResponse)
+	err := c.cc.Invoke(ctx, Adapter_SendLog_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AdapterServer is the server API for Adapter service.
 // All implementations must embed UnimplementedAdapterServer
 // for forward compatibility.
 type AdapterServer interface {
 	SendMail(context.Context, *SendMailRequest) (*SendMailResponse, error)
+	SendLog(context.Context, *SendLogRequest) (*SendLogResponse, error)
 	mustEmbedUnimplementedAdapterServer()
 }
 
@@ -64,6 +77,9 @@ type UnimplementedAdapterServer struct{}
 
 func (UnimplementedAdapterServer) SendMail(context.Context, *SendMailRequest) (*SendMailResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendMail not implemented")
+}
+func (UnimplementedAdapterServer) SendLog(context.Context, *SendLogRequest) (*SendLogResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendLog not implemented")
 }
 func (UnimplementedAdapterServer) mustEmbedUnimplementedAdapterServer() {}
 func (UnimplementedAdapterServer) testEmbeddedByValue()                 {}
@@ -104,6 +120,24 @@ func _Adapter_SendMail_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Adapter_SendLog_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendLogRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdapterServer).SendLog(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Adapter_SendLog_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdapterServer).SendLog(ctx, req.(*SendLogRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Adapter_ServiceDesc is the grpc.ServiceDesc for Adapter service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -114,6 +148,10 @@ var Adapter_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SendMail",
 			Handler:    _Adapter_SendMail_Handler,
+		},
+		{
+			MethodName: "SendLog",
+			Handler:    _Adapter_SendLog_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -2,18 +2,20 @@ package kafka
 
 import (
 	"context"
+	"time"
 
 	"github.com/segmentio/kafka-go"
-	"github.com/sirupsen/logrus"
 )
 
-type consumer struct{}
-
-func NewQueueConsumerImpl() Consumer {
-	return &consumer{}
+type consumer struct {
+	maxRetries int
 }
 
-func (c *consumer) StartWorker(brokerURL, topic, groupId string, worker func([]byte)) {
+func NewQueueConsumerImpl(maxRetries int) Consumer {
+	return &consumer{maxRetries: maxRetries}
+}
+
+func (c *consumer) StartWorker(brokerURL, topic, groupId string, worker func([]byte) error) {
 	r := kafka.NewReader(kafka.ReaderConfig{
 		Brokers: []string{brokerURL},
 		GroupID: groupId,
@@ -22,9 +24,13 @@ func (c *consumer) StartWorker(brokerURL, topic, groupId string, worker func([]b
 	for {
 		m, err := r.ReadMessage(context.Background())
 		if err != nil {
-			logrus.Fatalf("ReadMessage error: %s", err.Error())
 			continue
 		}
-		worker(m.Value)
+		for i := 1; i <= c.maxRetries; i++ {
+			if err := worker(m.Value); err == nil {
+				break
+			}
+			time.Sleep(time.Second * time.Duration(i))
+		}
 	}
 }

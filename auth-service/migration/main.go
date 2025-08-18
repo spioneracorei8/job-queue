@@ -11,10 +11,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// RUN MIGRATE TABLES
-/*
-go run "/home/spionera/Documents/me/code/go_clean_arch+msvcs/job-queue-auth-service/migration/main.go"
-*/
 func main() {
 	if err := godotenv.Load(); err != nil {
 		logrus.Errorf("Error loading .env file: %v", err)

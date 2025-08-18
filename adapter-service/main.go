@@ -5,6 +5,8 @@ import (
 	my_kafka "adapter-service/kafka"
 	"adapter-service/routes"
 	_grcp_adapter_handler "adapter-service/services/adapter/grpc"
+	"adapter-service/services/log/repository"
+	"adapter-service/services/log/usecase"
 	_mail_repo "adapter-service/services/mail/repository"
 	_mail_us "adapter-service/services/mail/usecase"
 	"fmt"
@@ -20,10 +22,13 @@ import (
 )
 
 var (
-	ROOT_PATH    string
-	GRPC_PORT    string
-	GRPC_TIMEOUT int
-	SERVER_READY chan bool
+	ROOT_PATH                       string
+	GRPC_PORT                       string
+	GRPC_TIMEOUT                    int
+	SERVICE_NAME                    string
+	SERVICE_CLIENT_LOG_GRPC_ADDRESS string
+	MAX_RETRIES                     int
+	SERVER_READY                    chan bool
 
 	KAFKA_BROKER_URL string
 
@@ -51,6 +56,10 @@ func init() {
 	}
 	GRPC_PORT = helper.GetENV("GRPC_PORT", "")
 	GRPC_TIMEOUT = cast.ToInt(helper.GetENV("GRPC_TIMEOUT", ""))
+	SERVICE_NAME = helper.GetENV("SERVICE_NAME", "")
+	SERVICE_CLIENT_LOG_GRPC_ADDRESS = helper.GetENV("SERVICE_CLIENT_LOG_GRPC_ADDRESS", "")
+	MAX_RETRIES = cast.ToInt(helper.GetENV("MAX_RETRIES", ""))
+
 	KAFKA_BROKER_URL = helper.GetENV("KAFKA_BROKER_URL", "")
 
 	SMTP_ADDRESS = helper.GetENV("SMTP_ADDRESS", "")
@@ -73,27 +82,29 @@ func main() {
 	defer grpcServ.GracefulStop()
 
 	queueProducer := my_kafka.NewQueueProducerImpl()
-	queueConsumer := my_kafka.NewQueueConsumerImpl()
+	queueConsumer := my_kafka.NewQueueConsumerImpl(MAX_RETRIES)
 
 	//==============================================================
 	// # REPOSITORIES
 	//==============================================================
 	mailRepo := _mail_repo.NewMailRepositoryImpl(queueProducer)
+	logRepo := repository.NewLogRepositoryImpl(queueProducer)
 
 	//==============================================================
 	// # USECASES
 	//==============================================================
 	mailUs := _mail_us.NewMailUsecaseImpl(mailRepo)
+	logUs := usecase.NewAdapterUsecaseImpl(logRepo)
 
 	//==============================================================
 	// # HANDLERS
 	//==============================================================
-	grpcAdapterHandler := _grcp_adapter_handler.NewGrpcAdapterHandlerImpl(mailUs)
+	grpcAdapterHandler := _grcp_adapter_handler.NewGrpcAdapterHandlerImpl(mailUs, logUs)
 
 	//==============================================================
 	// # KAFKA
 	//==============================================================
-	kafkaRoute := my_kafka.NewKafkaQueue(queueProducer, queueConsumer, SMTP_ADDRESS, SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD, MAIL_SENDER_NAME)
+	kafkaRoute := my_kafka.NewKafkaQueue(queueProducer, queueConsumer, SMTP_ADDRESS, SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD, MAIL_SENDER_NAME, GRPC_TIMEOUT, SERVICE_CLIENT_LOG_GRPC_ADDRESS)
 	kafkaRoute.StartKafkaQueue(KAFKA_BROKER_URL)
 
 	//==============================================================

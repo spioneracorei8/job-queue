@@ -7,4 +7,5 @@ import (
 
 type GrpcAdapterRepository interface {
 	SendMail(mail *models.MailForm) (*proto_models.SendMailResponse, error)
+	SendLog(params *models.LogForm) error
 }

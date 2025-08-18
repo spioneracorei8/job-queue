@@ -22,5 +22,5 @@ func NewRoute(g *gin.Engine, middleware middleware.MyMiddleware) *route {
 func (r *route) NewRegisterRoutes(handler register.RegisterHandler) {
 	api := r.g.Group("/api")
 
-	api.POST("/v1/register", r.middleware.ValidateRequiredHeader("source"), handler.RegisterUser)
+	api.POST("/v1/register", r.middleware.Logger(), r.middleware.ValidateRequiredHeader("source"), handler.RegisterUser)
 }

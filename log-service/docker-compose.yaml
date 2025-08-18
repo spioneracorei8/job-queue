@@ -1,0 +1,29 @@
+version: "3.8"
+name: log
+services:
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana_code
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=Do3EoOBFvceYJJB
+  loki:
+    image: grafana/loki:latest
+    container_name: loki_code
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+  promtail:
+    image: grafana/promtail:latest
+    container_name: promtail_code
+    volumes:
+    # host machine's:docker_container's
+    # อะไรก็ตามที่ container เขียนไว้ที่ /var/log/job_queue จะถูกเขียนมาที่โฟลเดอร์ ./logs บนเครื่อง host ด้วย (และในทางกลับกัน)
+      # - ./logs:/var/log/myapp
+      - ./logs:/var/log/job_queue
+      - ./promtail-config.yaml:/etc/promtail/promtail.yaml
+    command: -config.file=/etc/promtail/promtail.yaml
