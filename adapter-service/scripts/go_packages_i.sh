@@ -1,35 +1,21 @@
-## UUID
-```bash
+# UUID
 go get github.com/gofrs/uuid
-```
 
-## ENV
-```bash
+# ENV
 go get github.com/joho/godotenv
-```
-## LOG
-```bash
+
+# LOG
 go get github.com/sirupsen/logrus
-```
-```bash
 go get -u github.com/rs/zerolog/log
-```
-## CAST DATA TYPE
-```bash
+
+# CAST DATA TYPE
 go get github.com/spf13/cast
-```
 
-## GRPC
-```bash
+# GRPC
 go get google.golang.org/grpc
-```
 
-## KAFKA CENTRAL QUEUE
-```bash
+# KAFKA CENTRAL QUEUE
 go get github.com/segmentio/kafka-go
-```
 
-## MAIL
-```bash
+# MAIL
 go get gopkg.in/mail.v2
-```

@@ -1,48 +1,25 @@
-## FRAMEWORK
-```bash
+# !/bin/bash
+
+# FRAMEWORK
 go get -u github.com/gin-gonic/gin
-```
 
-## UUID
-```bash
+# UUID
 go get github.com/gofrs/uuid
-```
 
-## ENV
-```bash
+# ENV
 go get github.com/joho/godotenv
-```
-## LOG
-```bash
+
+# LOG
 go get github.com/sirupsen/logrus
-```
-```bash
-go get -u github.com/rs/zerolog/log
-```
-## CAST DATA TYPE
-```bash
+
+# CAST DATA TYPE
 go get github.com/spf13/cast
-```
-## GORM
-```bash
+
+# GORM
 go get -u gorm.io/gorm
-```
-```bash
 go get -u gorm.io/driver/postgres
-```
 
-## GRPC
-```bash
+# GRPC
 go get google.golang.org/grpc
-```
-```bash
 go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-```
-```bash
 go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
-```
-
-## VALIDATE
-```bash
-go get github.com/go-playground/validator/v10
-```
